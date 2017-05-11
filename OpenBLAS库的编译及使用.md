@@ -312,3 +312,14 @@ mingw64官网:[http://mingw-w64.sourceforge.net](http://mingw-w64.sourceforge.ne
 
 	*这两个宏定义，不然会出现大量的编译错误。这两个宏的主要意思是使用LAPACKE的complex类型的定义。*
 	</font>
+
+## 第四部分 BLAS优化原理实现
+
+[netlib](http://www.netlib.org/blas/)上的 **BLAS** 是使用Fortran语言的参考实现，代码效率不高。目前普遍使用的是
+经过优化的商业或开源库。
+
+OpenBLAS的实现可参考如下：
+
+- [BLISlab: A Sandbox for Optimizing GEMM](https://arxiv.org/pdf/1609.00076v1.pdf)
+- [How to Optimize GEMM Wiki](https://github.com/flame/how-to-optimize-gemm/wiki)
+- [GEMM: From Pure C to SSE Optimized Micro Kernels](http://apfel.mathematik.uni-ulm.de/~lehn/sghpc/gemm/)
