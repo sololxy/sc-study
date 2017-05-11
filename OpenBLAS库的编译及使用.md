@@ -1,6 +1,6 @@
 # OpenBLAS库的编译及使用
 
-![罗祥勇](images/luoxiangyong.svg)
+![罗祥勇](./images/luoxiangyong.svg)
 
 -------------
 
@@ -8,12 +8,16 @@
 
 邮箱：<solo_lxy@126.com>
 
-修订： 2017/05/10 第一版
+修订历史： 
+
+5/10/2017 16:20:00 PM  第一版<br>
+5/11/2017 10:15:35 AM  添加第四部分原理实现<br>
 
 --------------
 
 ## 第一部分 简要介绍
-**BLAS**即是*Basic linear Algebra Subprograms*，基本线性代数子程序，主要包括矩阵和矩阵，矩阵和向量，向量和向量操作，是科学和工程计算的基础数学库之一。
+**BLAS**即是*Basic linear Algebra Subprograms*，基本线性代数子程序，主要包括矩阵和矩阵，
+矩阵和向量，向量和向量操作，是科学和工程计算的基础数学库之一。
 
 OpenBLAS是高性能多核BLAS库，是GotoBLAS2 1.13 BSD版本的衍生版。
 项目主页是[https://github.com/xianyi/OpenBLAS](https://github.com/xianyi/OpenBLAS) 。
@@ -31,7 +35,8 @@ OpenBLAS是高性能多核BLAS库，是GotoBLAS2 1.13 BSD版本的衍生版。
 
 ## 第二部分 编译
 
-需要注意的是，OpenBLAS现在提供CMake形式的编译方式，在windows系统上如果直接使用**Microsoft Visual Studio**来编译的话，性能不如**MinGW**和**cygwin**。
+需要注意的是，OpenBLAS现在提供CMake形式的编译方式，在windows系统上如果直接使用
+**Microsoft Visual Studio**来编译的话，性能不如**MinGW**和**cygwin**。
 
 ### 编译设置
 
@@ -40,7 +45,8 @@ OpenBLAS是高性能多核BLAS库，是GotoBLAS2 1.13 BSD版本的衍生版。
 	make CC=gcc-4.7 FC=gfortran 	# 通常情况下，make会进行自动探测，够用了
 	make PREFIX=/your/path install 	#(可选)
 
-其中，make过程会自动的探测当前机器和编译环境，设置合适的选项。需注意的是，OpenBLAS会下载netlib上的LAPACK源代码。也就是说你的机器必须联网，
+其中，make过程会自动的探测当前机器和编译环境，设置合适的选项。需注意的是，OpenBLAS会下载netlib
+上的LAPACK源代码。也就是说你的机器必须联网，
 或者放入lapack的源代码包，或者不包括LAPACK即
 	
 	make NO_LAPACK=1
@@ -110,14 +116,17 @@ cygwin是内unix系统，使用它来编译OpenBLAS后的库Microsoft Visual Stu
 
 ### MinGW编译
 
-MinGW移植了类unix系统中GCC编译器，使用它来编译OpenBLAS后的库，Microsoft Visual Studio可以直接使用。
+MinGW移植了类unix系统中GCC编译器，使用它来编译OpenBLAS后的库，Microsoft Visual Studio
+可以直接使用。
 
-MinGW分为较早开发的MinGW32和之后为编译64位程序开发的MinGW-w64，MinGW32只能编译32位的程序，而mingw64不仅能编译64位程序，
-也能编译32位程序，还能进行交叉编译，即在32位主机上编译64位程序，在64位主机上编译32位程序。
+MinGW分为较早开发的MinGW32和之后为编译64位程序开发的MinGW-w64，MinGW32只能编译32位的程序，
+而mingw64不仅能编译64位程序，也能编译32位程序，还能进行交叉编译，即在32位主机上编译64位程序，
+在64位主机上编译32位程序。
 
 mingw64官网:[http://mingw-w64.sourceforge.net](http://mingw-w64.sourceforge.net)
 	
-具体安装方法这里就不说了，网上有很多教程。值得注意的是mingw-w64安装程序只安装了必要的编译系统，如果要正常使用make,ls等辅助工具还需要安装MSYS系统。
+具体安装方法这里就不说了，网上有很多教程。值得注意的是mingw-w64安装程序只安装了必要的编译系统，
+如果要正常使用make,ls等辅助工具还需要安装MSYS系统。
 
 编译方法：
 
@@ -128,19 +137,22 @@ mingw64官网:[http://mingw-w64.sourceforge.net](http://mingw-w64.sourceforge.ne
 		make 
 		make install PREFIX=/path/to/install_dir
 	
-	使用这种方法出来的库如果想供Microsoft Visual Studio的cl/link使用	，还需要手动生成Visual Studio使用的lib库：
+	使用这种方法出来的库如果想供Microsoft Visual Studio的cl/link使用	，还需要手动生成
+	Visual Studio使用的lib库：
 		
 		dlltool -z libopenblas.def --export-all-symbols libopenblas.dll 	# 首先生成def文件
 		dlltool -d libopenblas.def -l libopenblas.lib					 	# 使用上面生成的def文件生成lib文件
 
-	*<font color='red'>要注意的是，使用这种方式编译的OpenBLAS库必须是dll，即共享库（动态库)</font>*
+	*<font color='red'>要注意的是，使用这种方式编译的OpenBLAS库必须是dll，即共享库
+	（动态库)</font>*
 	
 	关于dlltool的使用可以参考[http://www.mingw.org/wiki/CreateImportLibraries](http://www.mingw.org/wiki/CreateImportLibraries)。
 
 
 ### Microsoft Visual Studio编译
 
-使用cmake生成Visual Studio解决方案，不过这种方式编译出来的库性能不高，因为OpenBLAS底层使用了AT&T gcc的汇编优化，这种语法cl不认。
+使用cmake生成Visual Studio解决方案，不过这种方式编译出来的库性能不高，因为OpenBLAS底层使
+用了AT&T gcc的汇编优化，这种语法cl不认。
 
 
 
@@ -310,13 +322,14 @@ mingw64官网:[http://mingw-w64.sourceforge.net](http://mingw-w64.sourceforge.ne
 		HAVE_LAPACK_CONFIG_H
 		LAPACK_COMPLEX_STRUCTURE
 
-	*这两个宏定义，不然会出现大量的编译错误。这两个宏的主要意思是使用LAPACKE的complex类型的定义。*
+	这两个宏定义，不然会出现大量的编译错误。这两个宏的主要意思是使用LAPACKE的complex类型
+	的定义。*
 	</font>
 
 ## 第四部分 BLAS优化原理实现
 
-[netlib](http://www.netlib.org/blas/)上的 **BLAS** 是使用Fortran语言的参考实现，代码效率不高。目前普遍使用的是
-经过优化的商业或开源库。
+[netlib](http://www.netlib.org/blas/)上的 **BLAS** 是使用Fortran语言的参考实现，代码
+效率不高。目前普遍使用的是经过优化的商业或开源库。
 
 OpenBLAS的实现可参考如下：
 
