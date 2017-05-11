@@ -323,3 +323,4 @@ OpenBLAS的实现可参考如下：
 - [BLISlab: A Sandbox for Optimizing GEMM](https://arxiv.org/pdf/1609.00076v1.pdf)
 - [How to Optimize GEMM Wiki](https://github.com/flame/how-to-optimize-gemm/wiki)
 - [GEMM: From Pure C to SSE Optimized Micro Kernels](http://apfel.mathematik.uni-ulm.de/~lehn/sghpc/gemm/)
+- [张先轶-OpenBLAS项目与矩阵乘法优化](https://v.qq.com/x/page/k0392dmalrt.html)
