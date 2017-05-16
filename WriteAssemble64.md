@@ -59,3 +59,114 @@ AMD64架构在IA-32上新增了64位暂存器，并兼容早期的16位和32位�
 请注意，虽然IA64，EM64T和AMD64都是64位处理器，但它们不完全兼容：
 .EM64T和AMD64除了很少数指令，如3DNOW以外，可以互相兼容，在其中之一上面编写和编译的应用程序通常可以全速运行在另外一个处理器上。
 .IA64采用了与其他两种完全不同的指令集，为Itanium2写的64位应用程序不能运行在EM64T和AMD64上，反之亦然。
+
+
+# Assemble Instruction Guide
+现在已经是64位的时代了，x86-64（AMD64)平台将是下一代计算机的体系结构，我们开发操作系统的当然要对x86-64的汇编有所了解。
+
+1.x86-64的寄存器
+
+x86-64较x86-32多了8个通用寄存器，而且，每个通用寄存器都是64位宽,它们是：
+rax,rbx,rcx,rdx,rsi,rdi,rsp,rbp
+r8,r9,r10,r11,r12,r13,r14,r15
+同时，x86-64全面支持x86-32和x86-16的通用寄存器:
+eax,ax,al,ah,
+ebx,bx,bl,bh,
+....
+而且，还对传统的edi,esi做了改进:
+edi ,32位
+di,16位
+dil ,8位，在传统的x86机器中，di是不可按照8位来访问的，但在x86-64下可以。
+同样esi也可以按照8位来访问。一个很特别的寄存器 rip，相当于x86-32的eip.　在x86-32是不可直接访问的，如mov eax,eip是错的，但在x86-64位下却可以，如 mov,rax,qword ptr [rip+100]是对的。而且，它除了是个程序计数器外，也是个“数据基地址”，有此可见，它现在是身兼两职！为什么在x86-64位下要用rip做访问数据的基地址呢？因为，在x86-64下，DS,ES,CS,SS都没有实际意义了，也就是说，它们不再参与地址计算，只是为了兼容x86-32。FS,GS还是参与地址计算，它们两个和x86-32的意义相同。
+
+
+
+2.x86-64的汇编
+
+x86-64的汇编和x86-32的没有多大的区别。添加了新寄存器和指令。
+写64位汇编代码时，可以用8、16、32、64位寄存器，如：
+  push   rdi
+  sub   rsp, 48               ;
+  mov   r10, rcx
+; Line 36
+  mov   rdi, rdx
+  xor   eax, eax
+  mov   ecx, 512            
+  rep stosb
+; Line 43
+  movsxd   r8, DWORD PTR [r10+16]
+  mov   QWORD PTR [rsp+32], rdx
+  mov   r9, QWORD PTR [r10+648]
+  mov   rdx, QWORD PTR [r10+52]
+  mov   rcx, QWORD PTR [r10+44]
+  call   fs_read_disk
+; Line 47
+  mov   ecx, 1
+  cmp   eax, ecx
+  cmovne   ecx, eax
+  mov   eax, ecx
+; Line 52
+  add   rsp, 48              
+  pop   rdi
+  ret   0
+再如：
+$L1818:
+; Line 2398
+  mov   al, BYTE PTR [rdx+rbx]
+  cmp   al, 32              
+  jne   SHORT $L1819
+
+  mov   BYTE PTR [rdx+rbx], 0
+$L1819:
+
+  add   r8d, 1
+  movsxd   rdx, r8d
+  xor   eax, eax
+  mov   rcx, r12
+  mov   rdi, rbx
+  repne scasb
+  not   rcx
+  sub   rcx, 1
+  cmp   rdx, rcx
+  jb   SHORT $L1818
+
+但，有点值得注意，当操作传统的32位寄存器时，那么，整个64位寄存器都会受到影响，如：
+mov eax,0ah
+那么，rax也等于000000000000000ah
+
+再如：
+mov rcx,0aaaaaaaaaaaaaaaah
+(此时ecx等于0aaaaaaaah)
+mov ecx,0ddddddddh
+(此时，rcx等于00000000ddddddddh,高32位受到了影响).
+
+规则：
+Example 1: 64-bit Add:
+Before:RAX =0002_0001_8000_2201
+RBX =0002_0002_0123_3301
+ADD RBX,RAX ;48 is a REX prefix for size.
+Result:RBX = 0004_0003_8123_5502
+
+Example 2: 32-bit Add:
+Before:RAX = 0002_0001_8000_2201
+RBX = 0002_0002_0123_3301
+ADD EBX,EAX ;32-bit add
+Result:RBX = 0000_0000_8123_5502
+(32-bit result is zero extended)
+
+Example 3: 16-bit Add:
+Before:RAX = 0002_0001_8000_2201
+RBX = 0002_0002_0123_3301
+ADD BX,AX ;66 is 16-bit size override
+Result:RBX = 0002_0002_0123_5502
+(bits 63:16 are preserved)
+
+Example 4: 8-bit Add:
+Before:RAX = 0002_0001_8000_2201
+RBX = 0002_0002_0123_3301
+ADD BL,AL ;8-bit add
+Result:RBX = 0002_0002_0123_3302
+(bits 63:08 are preserved)
+
+3.总结
+当然，这里说的都是最基本的东西，是针对通用寄存器言的。其实，x86-64对FPU(数学处理单元)和MMX,SSE,SSE2都做了很大的改进。然而，对写ＯＳ来说，我们最关心的还是通用寄存器
